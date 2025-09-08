@@ -6,7 +6,9 @@ Una aplicación web Flask que genera tests interactivos de opción múltiple a p
 
 - 📄 Soporte para archivos PDF y PPTX
 - 🤖 Generación automática de preguntas usando Google Gemini AI
-- 🎯 Tests de 2 preguntas con 4 opciones cada una
+- 🎯 Tests personalizables de 1 a 5 preguntas con 4 opciones cada una
+- 🖼️ Imagen de fondo personalizable para los quizzes
+- 🌙 Modo claro/oscuro con persistencia automática
 - 📱 Interfaz web responsive
 - 💾 Genera archivos HTML autocontenidos (funcionan offline)
 - ✅ Retroalimentación inmediata con justificaciones
@@ -40,9 +42,12 @@ python app.py
 
 2. Abre tu navegador en `http://localhost:5001`
 
-3. Sube un archivo PDF o PPTX
+3. Configura tu test:
+   - Selecciona un archivo PDF o PPTX
+   - Elige el número de preguntas (1-5) usando el slider
+   - Opcionalmente, añade una imagen de fondo
 
-4. La aplicación generará y descargará automáticamente un archivo HTML con el test interactivo
+4. La aplicación generará y descargará automáticamente un archivo HTML con el test interactivo personalizado
 
 ## Estructura del Proyecto
 
@@ -68,10 +73,25 @@ python app.py
 ## Funcionalidades del Test Generado
 
 - Tests autocontenidos que funcionan sin conexión a internet
-- Navegación por pestañas entre preguntas
+- Navegación por pestañas entre preguntas (dinámicamente generadas)
 - Validación de respuestas con retroalimentación visual
 - Justificaciones detalladas para cada respuesta
+- Modo claro/oscuro con toggle integrado
+- Imagen de fondo personalizada (opcional)
 - Resumen final con puntuación
+
+## Versiones
+
+### v1.2 - Mejoras de Personalización
+- ✨ **Selector de preguntas**: Elige entre 1-5 preguntas con slider interactivo
+- 🎨 **Imagen de fondo**: Personaliza tus quizzes con imágenes de fondo
+- 🌗 **Modo oscuro**: Toggle entre tema claro y oscuro con persistencia automática
+- 🔄 **Detección automática**: Respeta la preferencia del sistema del usuario
+
+### v1.0 - Versión Base
+- Generación básica de 2 preguntas por documento
+- Templates HTML autocontenidos
+- Integración con Google Gemini AI
 
 ## Requisitos
 
