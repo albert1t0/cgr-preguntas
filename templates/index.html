@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Tests</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f7f6;
+        }
+        .container {
+            text-align: center;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        input[type="file"] {
+            margin-top: 20px;
+        }
+        input[type="submit"] {
+            margin-top: 20px;
+            padding: 10px 20px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        .form-group {
+            margin: 20px 0;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+        .slider-container {
+            margin: 10px 0;
+        }
+        .slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #007bff;
+            cursor: pointer;
+        }
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #007bff;
+            cursor: pointer;
+            border: none;
+        }
+        .slider-value {
+            text-align: center;
+            margin-top: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Generador de Tests a partir de Documentos</h1>
+        <form action="/upload" method="post" enctype="multipart/form-data">
+            <p>Sube un archivo PDF o PPTX para generar un test interactivo.</p>
+            
+            <div class="form-group">
+                <label for="file">Selecciona tu documento:</label>
+                <input type="file" name="file" id="file" accept=".pdf,.pptx">
+            </div>
+            
+            <div class="form-group">
+                <label for="num_questions">Número de preguntas:</label>
+                <div class="slider-container">
+                    <input type="range" name="num_questions" id="num_questions" class="slider" 
+                           min="1" max="5" value="2" oninput="updateSliderValue(this.value)">
+                    <div class="slider-value" id="slider-value">2 preguntas</div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="background_image">Imagen de fondo (opcional):</label>
+                <input type="file" name="background_image" id="background_image" 
+                       accept=".jpg,.jpeg,.png,.gif" onchange="previewImage(this)">
+                <div id="image-preview" style="margin-top: 10px; display: none;">
+                    <img id="preview-img" style="max-width: 200px; max-height: 100px; border-radius: 5px; border: 1px solid #ccc;">
+                </div>
+            </div>
+            
+            <input type="submit" value="Generar Test">
+        </form>
+    </div>
+    
+    <script>
+        function updateSliderValue(value) {
+            const sliderValue = document.getElementById('slider-value');
+            const text = value === '1' ? '1 pregunta' : value + ' preguntas';
+            sliderValue.textContent = text;
+        }
+        
+        function previewImage(input) {
+            const preview = document.getElementById('image-preview');
+            const previewImg = document.getElementById('preview-img');
+            
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    preview.style.display = 'block';
+                }
+                reader.readAsDataURL(input.files[0]);
+            } else {
+                preview.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

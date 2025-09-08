@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Interactivo</title>
+    <style>
+        /* Variables CSS para temas */
+        :root {
+            --bg-color: #f0f2f5;
+            --container-bg: {% if background_image %}rgba(255, 255, 255, 0.95){% else %}white{% endif %};
+            --text-color: #333;
+            --tab-bg: #eee;
+            --tab-border: #ccc;
+            --tab-active-bg: white;
+            --option-bg: white;
+            --option-hover-bg: #f0f0f0;
+            --option-border: #ccc;
+            --correct-bg: #d4edda;
+            --correct-text: #155724;
+            --incorrect-bg: #f8d7da;
+            --incorrect-text: #721c24;
+        }
+        
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --container-bg: {% if background_image %}rgba(45, 45, 45, 0.95){% else %}#2d2d2d{% endif %};
+            --text-color: #e0e0e0;
+            --tab-bg: #3d3d3d;
+            --tab-border: #555;
+            --tab-active-bg: #2d2d2d;
+            --option-bg: #3d3d3d;
+            --option-hover-bg: #4d4d4d;
+            --option-border: #666;
+            --correct-bg: #1e4d2b;
+            --correct-text: #4caf50;
+            --incorrect-bg: #4d1e1e;
+            --incorrect-text: #f44336;
+        }
+        
+        /* Estilos generales */
+        body { 
+            font-family: sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            {% if background_image %}
+            background-image: url('{{ background_image }}');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            {% endif %}
+        }
+        .quiz-container { 
+            max-width: 800px; 
+            margin: 20px auto; 
+            background: var(--container-bg); 
+            padding: 20px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            {% if background_image %}
+            backdrop-filter: blur(5px);
+            {% endif %}
+        }
+
+        /* Toggle de tema */
+        .theme-toggle {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--tab-bg);
+            border: 2px solid var(--tab-border);
+            border-radius: 50px;
+            width: 60px;
+            height: 30px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            padding: 2px;
+            transition: all 0.3s ease;
+        }
+        
+        .theme-toggle::before {
+            content: '☀️';
+            position: absolute;
+            left: 4px;
+            font-size: 16px;
+            transition: opacity 0.3s ease;
+        }
+        
+        [data-theme="dark"] .theme-toggle::before {
+            content: '🌙';
+        }
+        
+        .toggle-slider {
+            width: 24px;
+            height: 24px;
+            background: var(--text-color);
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+            transform: translateX(0);
+        }
+        
+        [data-theme="dark"] .toggle-slider {
+            transform: translateX(28px);
+        }
+
+        /* Pestañas */
+        .tab-container { display: flex; border-bottom: 2px solid var(--tab-border); }
+        .tab { padding: 10px 20px; cursor: pointer; background: var(--tab-bg); border: 1px solid var(--tab-border); border-bottom: none; border-radius: 5px 5px 0 0; transition: all 0.3s ease; }
+        .tab.active { background: var(--tab-active-bg); border-bottom: 2px solid var(--tab-active-bg); position: relative; top: 2px; }
+
+        /* Contenido de las preguntas */
+        .question-content { display: none; padding: 20px 0; }
+        .question-content.active { display: block; }
+        .options { list-style: none; padding: 0; }
+        .options li { margin: 10px 0; }
+        .options label { display: block; padding: 10px; border: 1px solid var(--option-border); border-radius: 5px; cursor: pointer; background: var(--option-bg); color: var(--text-color); transition: all 0.3s ease; }
+        .options label:hover { background: var(--option-hover-bg); }
+        .options input { display: none; }
+
+        /* Retroalimentación */
+        .feedback { padding: 10px; margin-top: 15px; border-radius: 5px; display: none; transition: all 0.3s ease; }
+        .feedback.correct { background-color: var(--correct-bg); color: var(--correct-text); }
+        .feedback.incorrect { background-color: var(--incorrect-bg); color: var(--incorrect-text); }
+        .summary { display: none; padding: 20px; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <div class="theme-toggle" onclick="toggleTheme()">
+            <div class="toggle-slider"></div>
+        </div>
+        
+        <div class="tab-container">
+            {% for pregunta in quiz_data.preguntas %}
+            <div class="tab {% if loop.first %}active{% endif %}" onclick="showQuestion({{ loop.index0 }})">Pregunta {{ loop.index }}</div>
+            {% endfor %}
+        </div>
+
+        {% for pregunta in quiz_data.preguntas %}
+        {% set outer_loop = loop.index0 %}
+        <div id="question-{{ loop.index0 }}" class="question-content {% if loop.first %}active{% endif %}">
+            <h3>{{ pregunta.pregunta }}</h3>
+            <ul class="options">
+                {% for opcion in pregunta.opciones %}
+                <li>
+                    <label id="label-{{ outer_loop }}-{{ loop.index0 }}">
+                        <input type="radio" name="q{{ outer_loop }}" value="{{ loop.index0 }}" onclick="checkAnswer({{ outer_loop }}, {{ loop.index0 }}, {{ pregunta.respuesta_correcta_index }})">
+                        {{ opcion }}
+                    </label>
+                </li>
+                {% endfor %}
+            </ul>
+            <div id="feedback-{{ loop.index0 }}" class="feedback"></div>
+        </div>
+        {% endfor %}
+
+        <div id="summary" class="summary">
+            <h2>Resumen del Test</h2>
+            <p id="summary-text"></p>
+        </div>
+    </div>
+
+    <script>
+        const totalQuestions = {{ quiz_data.preguntas|length }};
+        let answers = new Array(totalQuestions).fill(null);
+        let correctAnswers = 0;
+        
+        const justificaciones = [
+            {% for pregunta in quiz_data.preguntas %}
+            "{{ pregunta.justificacion }}"{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        function showQuestion(index) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.question-content').forEach(content => content.classList.remove('active'));
+            document.querySelector(`.tab:nth-child(${index + 1})`).classList.add('active');
+            document.getElementById(`question-${index}`).classList.add('active');
+        }
+
+        function checkAnswer(questionIndex, selectedIndex, correctIndex) {
+            if (answers[questionIndex] !== null) return; // Ya respondida
+
+            const feedbackEl = document.getElementById(`feedback-${questionIndex}`);
+            const isCorrect = selectedIndex === correctIndex;
+            answers[questionIndex] = { selected: selectedIndex, correct: isCorrect };
+
+            if (isCorrect) {
+                correctAnswers++;
+                feedbackEl.textContent = '¡Correcto! ' + justificaciones[questionIndex];
+                feedbackEl.className = 'feedback correct';
+            } else {
+                feedbackEl.innerHTML = `Incorrecto. La respuesta correcta era la opción ${correctIndex + 1}.<br>` + justificaciones[questionIndex];
+                feedbackEl.className = 'feedback incorrect';
+            }
+            feedbackEl.style.display = 'block';
+
+            // Marcar visualmente con colores que respetan el tema
+            const correctLabel = document.getElementById(`label-${questionIndex}-${correctIndex}`);
+            const isDarkTheme = document.documentElement.getAttribute('data-theme') === 'dark';
+            
+            correctLabel.style.backgroundColor = isDarkTheme ? '#1e4d2b' : '#d4edda';
+            correctLabel.style.color = isDarkTheme ? '#4caf50' : '#155724';
+            
+            if (!isCorrect) {
+                const selectedLabel = document.getElementById(`label-${questionIndex}-${selectedIndex}`);
+                selectedLabel.style.backgroundColor = isDarkTheme ? '#4d1e1e' : '#f8d7da';
+                selectedLabel.style.color = isDarkTheme ? '#f44336' : '#721c24';
+            }
+
+            // Deshabilitar opciones
+            const options = document.getElementsByName(`q${questionIndex}`);
+            options.forEach(opt => opt.disabled = true);
+
+            // Comprobar si todas las preguntas han sido respondidas
+            if (answers.every(a => a !== null)) {
+                showSummary();
+            }
+        }
+
+        function showSummary() {
+            const summaryEl = document.getElementById('summary');
+            const summaryText = document.getElementById('summary-text');
+            summaryText.textContent = `Has respondido correctamente ${correctAnswers} de ${totalQuestions} preguntas.`;
+            if (correctAnswers === totalQuestions) {
+                summaryText.innerHTML += "<br>¡Felicidades! Has dominado el tema.";
+            }
+            summaryEl.style.display = 'block';
+        }
+
+        // Funcionalidad del tema claro/oscuro
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        }
+
+        // Cargar tema guardado al iniciar
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            } else {
+                // Detectar preferencia del sistema
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+            }
+        }
+
+        // Cargar tema al inicio
+        loadTheme();
+    </script>
+</body>
+</html>
