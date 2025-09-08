@@ -7,12 +7,14 @@ Una aplicación web Flask que genera tests interactivos de opción múltiple a p
 - 📄 Soporte para archivos PDF y PPTX
 - 🤖 Generación automática de preguntas usando Google Gemini AI
 - 🎯 Tests personalizables de 1 a 5 preguntas con 4 opciones cada una
+- 🏷️ Títulos personalizables para cada test
 - 🖼️ Imagen de fondo personalizable para los quizzes
 - 🌙 Modo claro/oscuro con persistencia automática
 - 📱 Interfaz web responsive
 - 💾 Genera archivos HTML autocontenidos (funcionan offline)
 - ✅ Retroalimentación inmediata con justificaciones
 - 📊 Resumen final de resultados
+- 🎮 Gestión post-generación con opciones de previsualización y descarga
 
 ## Instalación
 
@@ -43,11 +45,15 @@ python app.py
 2. Abre tu navegador en `http://localhost:5001`
 
 3. Configura tu test:
+   - Ingresa un título personalizado (opcional)
    - Selecciona un archivo PDF o PPTX
    - Elige el número de preguntas (1-5) usando el slider
    - Opcionalmente, añade una imagen de fondo
 
-4. La aplicación generará y descargará automáticamente un archivo HTML con el test interactivo personalizado
+4. La aplicación procesará el documento y te mostrará una página de resultados con tres opciones:
+   - **🔄 Reiniciar**: Volver a crear un nuevo test
+   - **👁️ Previsualizar**: Ver el test en una ventana emergente
+   - **⬇️ Descargar**: Descargar el archivo HTML del test
 
 ## Estructura del Proyecto
 
@@ -56,9 +62,10 @@ python app.py
 ├── requirements.txt    # Dependencias Python
 ├── .env               # Variables de entorno (no incluido en repo)
 ├── templates/
-│   ├── index.html     # Formulario de carga
-│   └── quiz.html      # Template del test interactivo
-├── uploads/           # Directorio para archivos subidos
+│   ├── index.html     # Formulario de carga con título personalizable
+│   ├── quiz.html      # Template del test interactivo
+│   └── success.html   # Página de resultados con opciones de acción
+├── uploads/           # Directorio para archivos subidos y generados
 └── .gitignore        # Archivos excluidos de git
 ```
 
@@ -73,14 +80,23 @@ python app.py
 ## Funcionalidades del Test Generado
 
 - Tests autocontenidos que funcionan sin conexión a internet
+- Título personalizado como encabezado principal (si se proporciona)
 - Navegación por pestañas entre preguntas (dinámicamente generadas)
 - Validación de respuestas con retroalimentación visual
 - Justificaciones detalladas para cada respuesta
-- Modo claro/oscuro con toggle integrado
+- Modo claro/oscuro con toggle integrado y persistencia
 - Imagen de fondo personalizada (opcional)
 - Resumen final con puntuación
 
 ## Versiones
+
+### v1.3 - Títulos y Gestión Avanzada
+- 🏷️ **Títulos personalizables**: Campo opcional para nombrar tus tests
+- 📋 **Página de resultados**: Interface moderna con tres opciones post-generación
+- 👁️ **Previsualización**: Vista previa en ventana emergente antes de descargar
+- 📁 **Nombres inteligentes**: Archivos nombrados según título personalizado
+- 🔄 **Gestión de flujo**: Opciones claras de reiniciar, previsualizar o descargar
+- ⚡ **Rutas especializadas**: Endpoints dedicados para preview y download
 
 ### v1.2 - Mejoras de Personalización
 - ✨ **Selector de preguntas**: Elige entre 1-5 preguntas con slider interactivo
