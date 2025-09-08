@@ -134,6 +134,16 @@
         .feedback.correct { background-color: var(--correct-bg); color: var(--correct-text); }
         .feedback.incorrect { background-color: var(--incorrect-bg); color: var(--incorrect-text); }
         .summary { display: none; padding: 20px; text-align: center; }
+        
+        /* Título personalizado */
+        .quiz-title {
+            margin: 0 70px 20px 0;
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--text-color);
+            text-align: center;
+            line-height: 1.2;
+        }
     </style>
 </head>
 <body>
@@ -141,6 +151,10 @@
         <div class="theme-toggle" onclick="toggleTheme()">
             <div class="toggle-slider"></div>
         </div>
+        
+        {% if custom_title %}
+        <h1 class="quiz-title">{{ custom_title }}</h1>
+        {% endif %}
         
         <div class="tab-container">
             {% for pregunta in quiz_data.preguntas %}

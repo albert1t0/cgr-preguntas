@@ -27,6 +27,19 @@
         input[type="file"] {
             margin-top: 20px;
         }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease;
+        }
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #007bff;
+        }
         input[type="submit"] {
             margin-top: 20px;
             padding: 10px 20px;
@@ -92,6 +105,11 @@
         <h1>Generador de Tests a partir de Documentos</h1>
         <form action="/upload" method="post" enctype="multipart/form-data">
             <p>Sube un archivo PDF o PPTX para generar un test interactivo.</p>
+            
+            <div class="form-group">
+                <label for="custom_title">Título del test (opcional):</label>
+                <input type="text" name="custom_title" id="custom_title" placeholder="Ej: Examen de Historia Mundial">
+            </div>
             
             <div class="form-group">
                 <label for="file">Selecciona tu documento:</label>

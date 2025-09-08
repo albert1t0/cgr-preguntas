@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Generado Exitosamente</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f4f7f6;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            text-align: center;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            max-width: 500px;
+            width: 100%;
+        }
+        .success-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            color: #28a745;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        .custom-title {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border-left: 4px solid #007bff;
+        }
+        .custom-title strong {
+            color: #007bff;
+        }
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        .btn {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #545b62;
+            transform: translateY(-2px);
+        }
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+        .btn-success:hover {
+            background-color: #1e7e34;
+            transform: translateY(-2px);
+        }
+        .icon {
+            font-size: 18px;
+        }
+        @media (min-width: 576px) {
+            .button-group {
+                flex-direction: row;
+                justify-content: center;
+            }
+            .btn {
+                flex: 1;
+                min-width: 140px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="success-icon">✅</div>
+        <h1>¡Test Generado!</h1>
+        <p class="subtitle">Tu test interactivo ha sido creado exitosamente</p>
+        
+        {% if custom_title %}
+        <div class="custom-title">
+            <strong>Título:</strong> {{ custom_title }}
+        </div>
+        {% endif %}
+        
+        <div class="button-group">
+            <button class="btn btn-secondary" onclick="window.location.href='/'">
+                <span class="icon">🔄</span>
+                Reiniciar
+            </button>
+            
+            <button class="btn btn-primary" onclick="previewQuiz()">
+                <span class="icon">👁️</span>
+                Previsualizar
+            </button>
+            
+            <button class="btn btn-success" onclick="downloadQuiz()">
+                <span class="icon">⬇️</span>
+                Descargar
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const filename = "{{ filename }}";
+        
+        function previewQuiz() {
+            const previewUrl = `/preview/${filename}`;
+            window.open(previewUrl, '_blank', 'width=1000,height=800,scrollbars=yes,resizable=yes');
+        }
+        
+        function downloadQuiz() {
+            const downloadUrl = `/download/${filename}`;
+            window.location.href = downloadUrl;
+        }
+    </script>
+</body>
+</html>

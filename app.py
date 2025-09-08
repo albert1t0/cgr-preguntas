@@ -8,6 +8,7 @@ import json
 from dotenv import load_dotenv
 import base64
 import mimetypes
+import re
 
 load_dotenv()
 
@@ -26,6 +27,26 @@ except (KeyError, ValueError) as e:
     # This will stop the app from starting if the key is not found
     raise SystemExit(e)
 
+
+def sanitize_filename(title):
+    """Convert title to safe filename"""
+    if not title or not title.strip():
+        return None
+    
+    # Remove HTML tags and normalize
+    title = re.sub(r'<[^>]+>', '', title)
+    title = title.strip()
+    
+    # Replace spaces and special characters
+    title = re.sub(r'[^\w\s-]', '', title)
+    title = re.sub(r'[\s_-]+', '_', title)
+    title = title.lower()
+    
+    # Limit length
+    if len(title) > 50:
+        title = title[:50]
+    
+    return title if title else None
 
 def process_background_image(image_file):
     """Process background image and convert to base64"""
@@ -136,8 +157,9 @@ def upload_file():
         filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
         file.save(filepath)
 
-        # Get number of questions from form
+        # Get form parameters
         num_questions = int(request.form.get("num_questions", 2))
+        custom_title = request.form.get("custom_title", "").strip()
 
         # Process background image if provided
         background_image = None
@@ -163,18 +185,50 @@ def upload_file():
 
         # Render the quiz template with the data
         rendered_html = render_template(
-            "quiz.html", quiz_data=quiz_data, background_image=background_image
+            "quiz.html", 
+            quiz_data=quiz_data, 
+            background_image=background_image,
+            custom_title=custom_title
         )
 
-        # Save the rendered HTML to a file
-        output_filename = f"test_{os.path.splitext(filename)[0]}.html"
+        # Generate output filename
+        safe_title = sanitize_filename(custom_title)
+        if safe_title:
+            output_filename = f"{safe_title}.html"
+        else:
+            output_filename = f"test_{os.path.splitext(filename)[0]}.html"
+        
         output_filepath = os.path.join(app.config["UPLOAD_FOLDER"], output_filename)
 
         with open(output_filepath, "w", encoding="utf-8") as f:
             f.write(rendered_html)
 
-        # Send the generated file to the user for download
-        return send_file(output_filepath, as_attachment=True)
+        # Redirect to success page instead of direct download
+        return render_template('success.html', 
+                             filename=output_filename,
+                             custom_title=custom_title)
+
+
+@app.route('/preview/<filename>')
+def preview_quiz(filename):
+    """Show quiz in preview mode"""
+    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    if os.path.exists(filepath):
+        with open(filepath, 'r', encoding='utf-8') as f:
+            content = f.read()
+        return content
+    else:
+        return "<h1>Error</h1><p>El archivo no se encontró.</p>", 404
+
+
+@app.route('/download/<filename>')
+def download_quiz(filename):
+    """Download quiz file"""
+    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    if os.path.exists(filepath):
+        return send_file(filepath, as_attachment=True)
+    else:
+        return "<h1>Error</h1><p>El archivo no se encontró.</p>", 404
 
 
 if __name__ == "__main__":
