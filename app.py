@@ -6,6 +6,8 @@ import pptx
 import google.generativeai as genai
 import json
 from dotenv import load_dotenv
+import base64
+import mimetypes
 
 load_dotenv()
 
@@ -22,6 +24,28 @@ except (KeyError, ValueError) as e:
     # This will stop the app from starting if the key is not found
     raise SystemExit(e)
 
+def process_background_image(image_file):
+    """Process background image and convert to base64"""
+    if not image_file or image_file.filename == '':
+        return None
+    
+    try:
+        # Read the image file
+        image_data = image_file.read()
+        image_file.seek(0)  # Reset file pointer
+        
+        # Get MIME type
+        mime_type, _ = mimetypes.guess_type(image_file.filename)
+        if not mime_type or not mime_type.startswith('image/'):
+            return None
+        
+        # Convert to base64
+        base64_image = base64.b64encode(image_data).decode('utf-8')
+        return f"data:{mime_type};base64,{base64_image}"
+        
+    except Exception as e:
+        print(f"Error procesando imagen de fondo: {e}")
+        return None
 
 def extract_text(filepath):
     ext = filepath.rsplit('.', 1)[1].lower()
@@ -45,28 +69,28 @@ def extract_text(filepath):
             return f"Error: No se pudo leer el archivo PPTX. {e}"
     return text
 
-def generate_quiz(text):
+def generate_quiz(text, num_questions=2):
     model = genai.GenerativeModel('gemini-1.5-flash')
-    prompt = '''
-    Basándote en el siguiente texto, genera un cuestionario de 2 preguntas de opción múltiple.
+    
+    # Generate example structure based on number of questions
+    example_questions = []
+    for i in range(num_questions):
+        example_questions.append({
+            "pregunta": f"¿Tu pregunta {i+1} aquí?",
+            "opciones": ["Opción A", "Opción B", "Opción C", "Opción D"],
+            "respuesta_correcta_index": i % 4,
+            "justificacion": f"La justificación de la pregunta {i+1}."
+        })
+    
+    example_structure = {
+        "preguntas": example_questions
+    }
+    
+    prompt = f'''
+    Basándote en el siguiente texto, genera un cuestionario de {num_questions} preguntas de opción múltiple.
     El formato de salida debe ser un objeto JSON válido y nada más. No incluyas '```json' o '```' en la salida.
     La estructura debe ser la siguiente:
-    {
-      "preguntas": [
-        {
-          "pregunta": "¿Tu pregunta aquí?",
-          "opciones": ["Opción A", "Opción B", "Opción C", "Opción D"],
-          "respuesta_correcta_index": 2,
-          "justificacion": "La justificación de por qué la respuesta es correcta."
-        },
-        {
-          "pregunta": "¿Tu segunda pregunta aquí?",
-          "opciones": ["Opción 1", "Opción 2", "Opción 3", "Opción 4"],
-          "respuesta_correcta_index": 0,
-          "justificacion": "La justificación de la segunda respuesta."
-        }
-      ]
-    }
+    {json.dumps(example_structure, indent=2, ensure_ascii=False)}
 
     Texto de contexto:
     ''' + text
@@ -98,17 +122,25 @@ def upload_file():
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(filepath)
         
+        # Get number of questions from form
+        num_questions = int(request.form.get('num_questions', 2))
+        
+        # Process background image if provided
+        background_image = None
+        if 'background_image' in request.files:
+            background_image = process_background_image(request.files['background_image'])
+        
         extracted_text = extract_text(filepath)
         if extracted_text.startswith("Error:"):
             return f"<h1>Error en la extracción de texto</h1><p>{extracted_text}</p>", 400
 
-        quiz_data = generate_quiz(extracted_text)
+        quiz_data = generate_quiz(extracted_text, num_questions)
 
         if "error" in quiz_data:
              return f"<h1>Error al generar el Quiz</h1><pre>{json.dumps(quiz_data, indent=2)}</pre>", 500
 
         # Render the quiz template with the data
-        rendered_html = render_template('quiz.html', quiz_data=quiz_data)
+        rendered_html = render_template('quiz.html', quiz_data=quiz_data, background_image=background_image)
 
         # Save the rendered HTML to a file
         output_filename = f"test_{os.path.splitext(filename)[0]}.html"
