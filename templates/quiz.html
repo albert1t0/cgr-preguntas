@@ -86,13 +86,18 @@
         .theme-toggle::before {
             content: '☀️';
             position: absolute;
-            left: 4px;
+            left: 38px;
+            top: 50%;
+            transform: translateY(-50%);
             font-size: 16px;
-            transition: opacity 0.3s ease;
+            z-index: 2;
+            transition: all 0.3s ease;
+            pointer-events: none;
         }
         
         [data-theme="dark"] .theme-toggle::before {
             content: '🌙';
+            left: 6px;
         }
         
         .toggle-slider {
@@ -102,6 +107,8 @@
             border-radius: 50%;
             transition: transform 0.3s ease;
             transform: translateX(0);
+            z-index: 1;
+            position: relative;
         }
         
         [data-theme="dark"] .toggle-slider {
